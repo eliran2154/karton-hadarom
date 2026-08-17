@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>הזמנה - קרטון הדרום</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--gold-light:#e8c97a;--dark:#1a1a2e;--darker:#0f0f1a;--surface:#16213e;--surface2:#1e2d4a;--text:#f0ead6;--text-muted:#8a9bb5;--border:#2a3f60}
+*{box-sizing:border-box;margin:0;padding:0}
+html{min-height:-webkit-fill-available}
+body{font-family:'Heebo',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--darker);color:var(--text);min-height:100vh;min-height:-webkit-fill-available;padding-bottom:calc(110px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.header{background:linear-gradient(135deg,var(--dark),var(--surface));border-bottom:2px solid var(--gold);padding:calc(18px + env(safe-area-inset-top)) 16px 14px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.header-badge{font-size:10px;letter-spacing:4px;color:var(--gold);margin-bottom:3px}
+.header-title{font-size:24px;font-weight:900}
+.header-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.progress{height:3px;background:var(--border)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));width:0;transition:width .3s}
+.section{margin:10px 10px 0;background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.sec-head{display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--surface2);cursor:pointer;border-bottom:1px solid var(--border);user-select:none}
+.sec-title{flex:1;font-size:14px;font-weight:700;color:var(--gold)}
+.sec-badge{background:var(--gold);color:var(--darker);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:none}
+.sec-badge.on{display:block}
+.sec-arrow{color:var(--text-muted);font-size:11px;transition:transform .25s}
+.section.closed .sec-arrow{transform:rotate(-90deg)}
+.section.closed .sec-body{display:none}
+.row{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid rgba(42,63,96,.3);gap:10px}
+.row-name{flex:1;font-size:13px}
+.qty{display:flex;align-items:center;background:var(--darker);border-radius:8px;border:1px solid var(--border);overflow:hidden}
+.qbtn{width:34px;height:34px;background:transparent;border:0;color:var(--gold);font-size:20px;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.qval{width:38px;text-align:center;font-size:15px;font-weight:700;color:var(--text);border:0;background:transparent}
+.qval::-webkit-outer-spin-button,.qval::-webkit-inner-spin-button{-webkit-appearance:none}
+.notes-wrap{margin:10px 10px 0;background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:12px 14px}
+.notes-label{font-size:12px;color:var(--text-muted);margin-bottom:7px}
+.notes-ta{width:100%;background:var(--darker);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'Heebo',sans-serif;font-size:13px;color:var(--text);resize:none;min-height:65px;direction:rtl}
+.warning{margin:10px 10px 0;padding:12px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.35);border-radius:14px;color:var(--gold-light);font-size:13px;font-weight:700;text-align:center}
+.footer{position:fixed;bottom:0;left:0;right:0;background:var(--darker);border-top:2px solid var(--gold);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;box-shadow:0 -8px 30px rgba(0,0,0,.6)}
+.foot-info{flex:1}.foot-count{font-size:20px;font-weight:900;color:var(--gold);display:block}.foot-label{font-size:11px;color:var(--text-muted)}
+.send-btn{background:linear-gradient(135deg,#25D366,#128C7E);border:0;border-radius:12px;color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;padding:11px 18px;touch-action:manipulation}
+.toast{position:fixed;top:75px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--gold);color:var(--darker);font-weight:700;padding:9px 18px;border-radius:30px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-badge">✦ הזמנה ✦</div><div class="header-title">קרטון הדרום</div><div class="header-sub">בחר כמויות ושלח בווטסאפ</div></div>
+<div class="progress"><div class="progress-fill" id="prog"></div></div>
+<div id="cat"></div>
+<div class="notes-wrap"><div class="notes-label">📝 הערות להזמנה</div><textarea class="notes-ta" id="notes" placeholder="חוסרים, בקשות מיוחדות..."></textarea></div>
+<div class="warning">‼️ דווח חוסרים בהקדם האפשרי ‼️</div>
+<div class="footer"><div class="foot-info"><span class="foot-count" id="cnt">0</span><span class="foot-label">פריטים נבחרו</span></div><button class="send-btn" onclick="sendOrder()">שלח הזמנה</button></div>
+<div class="toast" id="toast"></div>
+<script>
+const PHONE='972544274897';
+const PRODUCTS=[
+'משטח שקיות דליה',
+'קראפט 340',
+'קראפט 370',
+'קראפט 520',
+'קראפט 650',
+'מגש חורים פלייבוקס',
+'שקיות זילוף',
+'שקיות גיילורד',
+'שקית 4 חום',
+'שקית 4 לבן',
+'שקית 8 חום',
+'שקית 8 לבן',
+'שקית 12 חום',
+'שקית 12 לבן',
+'שקית 12 אלומיניום',
+'שקית 14 חום',
+'שקית 14 לבן',
+'שקית 14 מודפס',
+'שקית 16 חום',
+'שקית 16 לבן',
+'שקית 14 חלון',
+'שקית 16 חלון',
+'שקית 18 חום 70 גר',
+'פיתה חום מודפס',
+'פיתה לבן מודפס',
+'פיתה חום חלק',
+'פיתה לבן חלק',
+'פיתה אלומיניום',
+'חצי בגט חום מודפס',
+'חצי בגט לבן מודפס',
+'חצי בגט חום',
+'חצי בגט לבן',
+'חצי בגט חום חלון',
+'חצי בגט אלומיניום',
+'בגט שלם חום',
+'בגט שלם לבן',
+'קונוס 14',
+'קונוס 17',
+'קונוס 21',
+'דוחה שומן',
+'צ׳יפס אלומיניום לבן',
+'סקופי',
+'נקניקיה',
+'סירה חום קטנה',
+'סירה חום גדולה',
+'מאפים 0.5 סגור',
+'מאפים 1.5 סגור',
+'מאפים סגור 6 פינות',
+'מאפים 1.5 פתוח',
+'קופסה לפיתה חום',
+'קרטון טורט גנרי',
+'קרטון סופגניה',
+'קרטון מעדנית',
+'מכסה מעדנית',
+'מכסה 6B עבה ‼️',
+'מכסה 5 עבה ‼️',
+'מכסה 12 עבה ‼️',
+'מכסה TV עבה ‼️',
+'מכסה 80A עבה ‼️',
+'מכסה 90 עבה ‼️',
+'מכסה 105 עבה ‼️',
+'פרגמנט חום 25/35',
+'פרגמנט לבן 30/40',
+'פרגמנט 30/40 חום',
+'פרגמנט 40/50',
+'פרגמנט מודפס לבן',
+'פרגמנט מודפס חום',
+'פרגפלסט',
+'פלייסמנט עיתון',
+'פלייסמנט פרוצס',
+'פלייסמנט 30/40',
+'נייר אפיה 23/33',
+'סלייסים',
+'קרפט פסים 25/35',
+'פס זהב 8/28',
+'מגש זהב 14/35',
+'מגש מלצרים 37',
+'מגש מלצרים 50/60',
+'עיתון חצי פוליו ‼️',
+'עיתון פוליו ‼️',
+'עיתון 30/30',
+'עיתון 80/120',
+'נייר כוורת',
+'צלופן 30/40 שקוף',
+'קרטון קרפ',
+'רולדה ארוך',
+'וופל בלגי',
+'מנשא זוגי חלק',
+'מנשא זוגי מודפס'
+];
+const Q={};
+let totalProds=PRODUCTS.length;
+function key(i){return 'p'+i}
+function build(){const wrap=document.getElementById('cat');const div=document.createElement('div');div.className='section';const head=document.createElement('div');head.className='sec-head';head.innerHTML='<span class="sec-title">📦 הזמנה קרטון הדרום</span><span class="sec-badge" id="mainBadge"></span><span class="sec-arrow">▼</span>';head.onclick=()=>div.classList.toggle('closed');div.appendChild(head);const body=document.createElement('div');body.className='sec-body';PRODUCTS.forEach((p,i)=>body.appendChild(makeRow(p,i)));div.appendChild(body);wrap.appendChild(div)}
+function makeRow(prod,i){const k=key(i);Q[k]=0;const row=document.createElement('div');row.className='row';const name=document.createElement('span');name.className='row-name';name.textContent=prod;const qty=document.createElement('div');qty.className='qty';const minus=document.createElement('button');minus.className='qbtn';minus.type='button';minus.textContent='−';minus.onclick=()=>adj(k,-1);const input=document.createElement('input');input.className='qval';input.type='number';input.min='0';input.value='0';input.id='q_'+k;input.inputMode='numeric';input.setAttribute('pattern','[0-9]*');input.onchange=()=>inp(k,input);const plus=document.createElement('button');plus.className='qbtn';plus.type='button';plus.textContent='+';plus.onclick=()=>adj(k,1);qty.append(minus,input,plus);row.append(name,qty);return row}
+function adj(k,d){Q[k]=Math.max(0,(Q[k]||0)+d);document.getElementById('q_'+k).value=Q[k];refresh()}
+function inp(k,el){Q[k]=Math.max(0,parseInt(el.value,10)||0);el.value=Q[k];refresh()}
+function total(){return Object.values(Q).reduce((a,b)=>a+b,0)}
+function refresh(){const t=total();document.getElementById('cnt').textContent=t;const filled=Object.values(Q).filter(v=>v>0).length;document.getElementById('prog').style.width=Math.min(100,(filled/totalProds)*100)+'%';const badge=document.getElementById('mainBadge');badge.textContent=t;badge.className='sec-badge'+(t>0?' on':'')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function sendOrder(){
+if(total()===0){showToast('⚠️ לא נבחרו פריטים!');return}
+const d=new Date().toLocaleDateString('he-IL');
+let lines=['🛒 *הזמנה - קרטון הדרום*',`📅 ${d}`,'─────────────────'];
+PRODUCTS.forEach((prod,i)=>{const v=Q[key(i)];if(v>0)lines.push(`• ${prod}: *${v}*`)});
+const notes=document.getElementById('notes').value.trim();
+if(notes)lines.push('','─────────────────',`📝 *הערות:* ${notes}`);
+lines.push('','─────────────────',`✅ סה״כ: *${total()} פריטים*`,'','‼️ *דווח חוסרים בהקדם האפשרי* ‼️','','*אשר*');
+window.location.href=`https://wa.me/${PHONE}?text=${encodeURIComponent(lines.join('\n'))}`;
+}
+build();
+</script>
+</body>
+</html>
